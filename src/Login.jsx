@@ -40,8 +40,8 @@ function Login() {
     >
       <CardMedia
         component="img"
-        sx={{ width: 350, paddingY: "9em", paddingX: "5em" }}
-        image="src\assets\react.svg"
+        sx={{ width: 450, paddingY: "9em", paddingX: "5em" }}
+        image="src\assets\react.svg "
         alt="ReactJS Logo"
       />
       <Box
@@ -136,6 +136,7 @@ function Login() {
               width: "17.5em",
               marginTop: "1.5em",
             }}
+            href="/users"
           >
             Login
           </Button>
