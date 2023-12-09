@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -18,27 +18,31 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import Cookies from "js-cookie";
-function Login() {
+
+function Register() {
   const theme = useTheme();
   const [showPassword, setShowPassword] = useState(false);
+  const [errMessage, setErrMessage] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [errMessage, setErrMessage] = useState("");
+  const [fullname, setFullname] = useState("");
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  async function loginAcc() {
+  async function registerAcc() {
+    if (!username || !password)
+      return setErrMessage("Please enter a username and password");
     const payload = new FormData();
     payload.append("username", username);
     payload.append("password", password);
+    payload.append("fullname", fullname);
     const res = await fetch(
-      process.env.REACT_APP_API_URL + "login",
+        process.env.REACT_APP_API_URL + "register",
       {
         method: "POST",
         body: payload,
@@ -48,19 +52,9 @@ function Login() {
     if (data.message == "Error") return setErrMessage(data["error-message"]);
     else if (data.message == "Success") {
         setErrMessage()
-        Cookies.set('username', data.result[1], {expires: 30})
-        console.log(data)
+        navigate('/')
     }
   }
-  function getCookie(){
-    const cookie = Cookies.get()
-    if(cookie.username) return navigate('/kelas')
-  }
-
-  useEffect(() => {
-    getCookie()
-  })
-
 
   return (
     <Card
@@ -87,7 +81,7 @@ function Login() {
           alignItems: "center",
           textAlign: "center",
           padding: "1em",
-          maxWidth: "400px"
+          maxWidth: "400px",
         }}
       >
         <CardContent sx={{ flex: "1 0 auto", paddingY: "4em" }}>
@@ -99,13 +93,14 @@ function Login() {
             color="text.secondary"
             component="div"
           >
-            Login to access the application
+            Register a new account
           </Typography>
 
           <TextField
             id="standard-basic"
             label="Username"
             variant="standard"
+            required
             sx={{ marginY: "1em", width: "15em", input: { color: "black" } }}
             onChange={(e) => setUsername(e.target.value)}
           />
@@ -116,6 +111,7 @@ function Login() {
             type={showPassword ? "text" : "password"}
             sx={{ marginY: "1em", width: "15em", input: { color: "black" } }}
             onChange={(e) => setPassword(e.target.value)}
+            required
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -131,10 +127,22 @@ function Login() {
               ),
             }}
           />
+          <TextField
+            id="standard-basic"
+            label="Full Name"
+            variant="standard"
+            sx={{ marginY: "1em", width: "15em", input: { color: "black" } }}
+            onChange={(e) => setFullname(e.target.value)}
+          />
           <Typography
             sx={{ color: "red", fontSize: 14, alignSelf: "flex-start" }}
           >
             {errMessage}
+          </Typography>
+          <Typography
+            sx={{ color: "red", fontSize: 14, alignSelf: "flex-start" }}
+          >
+            *Required
           </Typography>
 
           <Button
@@ -148,9 +156,9 @@ function Login() {
               width: "17.5em",
               marginTop: "1.5em",
             }}
-            onClick={() => loginAcc()}
+            onClick={() => registerAcc()}
           >
-            Login
+            Register
           </Button>
         </CardContent>
         <Box sx={{ display: "flex", alignItems: "center", pl: 1, pb: 1 }}>
@@ -158,9 +166,9 @@ function Login() {
             component="button"
             sx={{ fontSize: "12px", color: "RGBA(10,10,13,0.91)" }}
             underline="false"
-            onClick={() => navigate('/register')}
+            onClick={() => navigate("/")}
           >
-            Create an account
+            Login to your account
           </Link>
         </Box>
       </Box>
@@ -168,4 +176,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default Register;

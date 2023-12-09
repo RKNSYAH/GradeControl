@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { styled, useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import MuiDrawer from '@mui/material/Drawer';
@@ -19,10 +19,10 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
-import { HouseOutlined } from "@mui/icons-material";
+import { GradingRounded, HouseOutlined, LibraryBooksRounded, LogoutRounded, SchoolRounded } from "@mui/icons-material";
 
-
-
+import AccountCircle from '@mui/icons-material/AccountCircle';
+import Cookies from "js-cookie";
 
 const drawerWidth = 240;
 
@@ -93,7 +93,8 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
     }),
   }),
 );
-function CustomAppBar() {
+
+function CustomAppBar({kelasId, mode, position, children}) {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const handleDrawerOpen = () => {
@@ -104,7 +105,26 @@ function CustomAppBar() {
     setOpen(false);
   };
 
+  const pages = mode == 'Kelas' ? [
+    {name: 'Kelas', url: '/kelas', icon: <SchoolRounded />},
+    {name: 'Mapel', url: `/mapel/${kelasId}`, icon: <LibraryBooksRounded />},
+    {name: 'Nilai', url: `/nilai/${kelasId}`, icon: <GradingRounded />},
+  ] : [
+    {name: 'Kelas', url: '/kelas', icon: <SchoolRounded />},
+  ]
+  const navigate = useNavigate()
 
+  function getCookie(){
+    const cookie = Cookies.get()
+    if(!cookie.username) return navigate('/')
+  }
+
+  function logout(){
+    Cookies.remove('username')
+    navigate('/')
+  }
+
+  useEffect(() => getCookie())
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
@@ -122,8 +142,9 @@ function CustomAppBar() {
           >
             <MenuIcon />
           </IconButton>
+          <AccountCircle sx={{marginRight: 5}}/>
           <Typography variant="h6" noWrap component="div">
-            Dashboard GradeControl
+            {position}
           </Typography>
         </Toolbar>
       </AppBar>
@@ -137,14 +158,15 @@ function CustomAppBar() {
         </DrawerHeader>
         <Divider />
         <List>
-          {['Dashboard'].map((text, index) => (
-            <ListItem key={text} disablePadding sx={{ display: 'block' }}>
+          {pages.map((text, index) => (
+            <ListItem key={index} disablePadding sx={{ display: 'block' }}>
               <ListItemButton
                 sx={{
                   minHeight: 48,
                   justifyContent: open ? 'initial' : 'center',
                   px: 2.5,
                 }}
+                onClick={() => navigate(text.url)}
               >
                 <ListItemIcon
                   sx={{
@@ -154,15 +176,40 @@ function CustomAppBar() {
                     color: '#fff'
                   }}
                 >
-                  <HouseOutlined />
+                  {text.icon}
                 </ListItemIcon>
-                <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
+                <ListItemText primary={text.name} sx={{ opacity: open ? 1 : 0 }} />
               </ListItemButton>
-            </ListItem>
+          </ListItem>
           ))}
-        </List>
         <Divider />
+          <ListItemText primary="Administrasi" style={{opacity: open ? 0.7: 0, textAlign: 'center'}} />
+          <Divider />
+        <ListItemButton
+                sx={{
+                  minHeight: 48,
+                  justifyContent: open ? 'initial' : 'center',
+                  px: 2.5,
+                }}
+                onClick={() => logout()}
+                >
+                <ListItemIcon
+                  sx={{
+                    minWidth: 0,
+                    mr: open ? 3 : 'auto',
+                    justifyContent: 'center',
+                    color: '#fff'
+                  }}
+                  >
+                  <LogoutRounded />
+                </ListItemIcon>
+                <ListItemText primary="Logout" sx={{ opacity: open ? 1 : 0 }} />
+              </ListItemButton>
+        </List>
       </Drawer>
+      <Box component="main" sx={{flexGrow: 1, padding: '24px'}}>
+        {children}
+      </Box>
     </Box>
   );
 }
